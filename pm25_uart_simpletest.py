@@ -23,6 +23,7 @@ Reference:
 """
 
 import time
+import os
 
 
 def _print_measurements(data: dict) -> None:
@@ -47,23 +48,23 @@ def _print_measurements(data: dict) -> None:
 
 def main() -> None:
     try:
-        import board
-        import busio
+        import serial
         from adafruit_pm25.uart import PM25_UART
     except Exception as exc:  # pragma: no cover
-        print("Missing Raspberry Pi / CircuitPython libraries.")
+        print("Missing libraries for PM2.5 UART reading.")
         print("Run this on a Raspberry Pi with:")
         print("  pip install adafruit-circuitpython-pm25 pyserial")
         print(f"Import error: {exc}")
         raise
 
-    # Raspberry Pi UART pins (TX/RX). board.TX/board.RX map to the primary UART.
-    # On many Pi OS setups, this corresponds to /dev/serial0.
-    uart = busio.UART(board.TX, board.RX, baudrate=9600, timeout=0.25)
+    # Raspberry Pi primary UART device.
+    # Override if needed, e.g. PM25_SERIAL_PORT=/dev/ttyS0 or PM25_SERIAL_PORT=COM3.
+    serial_port = os.getenv("PM25_SERIAL_PORT", "/dev/serial0")
+    uart = serial.Serial(serial_port, baudrate=9600, timeout=1)
 
     # Create the PM25 sensor object. We set reset_pin=None because with UART wiring
     # you typically don't have a reset line connected.
-    pm25 = PM25_UART(uart, reset_pin=None)
+    pm25 = PM25_UART(uart, reset_pin=None)  # type: ignore[arg-type]
 
     print("PM2.5 UART simple test running... (Ctrl+C to stop)")
 

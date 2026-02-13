@@ -7,7 +7,10 @@ Wiring (Raspberry Pi):
 - Sensor VCC -> 5V (or 3V depending on your model; many PM25 boards use 5V)
 - Sensor GND -> GND
 - Sensor TX  -> Pi RX (GPIO 15 / UART RXD)
-- Sensor RX  -> Pi TX (GPIO 14 / UART TXD)
+
+One-way reading note:
+- For basic reading, the Pi does NOT need to transmit to the sensor.
+- You can leave Sensor RX unconnected (Pi TX not used).
 
 Notes:
 - Enable UART on the Pi (raspi-config -> Interface Options -> Serial):

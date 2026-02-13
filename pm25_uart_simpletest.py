@@ -25,7 +25,6 @@ Reference:
 - https://learn.adafruit.com/pm25-air-quality-sensor/python-and-circuitpython
 """
 
-import argparse
 import csv
 import os
 import time
@@ -51,30 +50,13 @@ def _print_measurements(data: dict) -> None:
     print("Particles > 10 um / 0.1L air:", data["particles 100um"])
 
 
-def _iso_timestamp(ts: float | None = None) -> str:
-    if ts is None:
-        ts = time.time()
-    # ISO-like, local time (easy to read in spreadsheets)
-    return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(ts))
-
-
-def _default_output_path() -> str:
-    # Use a timestamped filename to avoid overwriting runs.
-    return f"pm25_log_{time.strftime('%Y%m%d_%H%M%S')}.csv"
+SERIAL_PORT = os.getenv("PM25_SERIAL_PORT", "/dev/serial0")
+OUTPUT_CSV = "pm25_data.csv"
+DURATION_S = 60  # fixed run time (seconds)
+INTERVAL_S = 2   # seconds between successful reads
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Read PM2.5 data over UART and log to CSV")
-    parser.add_argument("--duration", type=float, default=60.0, help="How long to log for (seconds)")
-    parser.add_argument("--interval", type=float, default=2.0, help="Delay between successful reads (seconds)")
-    parser.add_argument("--output", default=_default_output_path(), help="Output CSV file path")
-    parser.add_argument(
-        "--port",
-        default=os.getenv("PM25_SERIAL_PORT", "/dev/serial0"),
-        help="Serial device (e.g. /dev/serial0, /dev/ttyS0)",
-    )
-    args = parser.parse_args()
-
     try:
         import serial
         from adafruit_pm25.uart import PM25_UART
@@ -85,33 +67,33 @@ def main() -> None:
         print(f"Import error: {exc}")
         raise
 
-    uart = serial.Serial(args.port, baudrate=9600, timeout=1)
+    uart = serial.Serial(SERIAL_PORT, baudrate=9600, timeout=1)
 
     # Create the PM25 sensor object. We set reset_pin=None because with UART wiring
     # you typically don't have a reset line connected.
     pm25 = PM25_UART(uart, reset_pin=None)  # type: ignore[arg-type]
 
-    print(f"PM2.5 UART logging started. Duration={args.duration}s Interval={args.interval}s")
-    print(f"Serial port: {args.port}")
-    print(f"Output CSV:  {args.output}")
+    print(f"PM2.5 UART logging started. Duration={DURATION_S}s Interval={INTERVAL_S}s")
+    print(f"Serial port: {SERIAL_PORT}")
+    print(f"Output CSV:  {OUTPUT_CSV}")
 
     start_ts = time.time()
-    end_ts = start_ts + max(0.0, args.duration)
+    end_ts = start_ts + max(0, int(DURATION_S))
     reads = 0
 
     # Write CSV with a metadata line first, then a header row.
-    with open(args.output, "w", newline="") as f:
+    with open(OUTPUT_CSV, "w", newline="") as f:
         f.write(
             "# meta," +
-            f"created={_iso_timestamp(start_ts)}," +
-            f"duration_s={args.duration}," +
-            f"interval_s={args.interval}," +
-            f"port={args.port}\n"
+            f"start_epoch={int(start_ts)}," +
+            f"duration_s={int(DURATION_S)}," +
+            f"interval_s={int(INTERVAL_S)}," +
+            f"port={SERIAL_PORT}\n"
         )
         writer = csv.writer(f)
         writer.writerow(
             [
-                "timestamp",
+                "t_s",
                 "pm25_standard",
                 "pm25_env",
                 "pm10_standard",
@@ -135,12 +117,13 @@ def main() -> None:
                     continue
 
                 now = time.time()
-                print(_iso_timestamp(now))
+                t_s = int(now - start_ts)
+                print(f"t={t_s}s")
                 _print_measurements(data)
 
                 writer.writerow(
                     [
-                        _iso_timestamp(now),
+                        t_s,
                         data.get("pm25 standard"),
                         data.get("pm25 env"),
                         data.get("pm10 standard"),
@@ -156,14 +139,14 @@ def main() -> None:
                 f.flush()
                 reads += 1
 
-                time.sleep(max(0.0, args.interval))
+                time.sleep(max(0, int(INTERVAL_S)))
         finally:
             try:
                 uart.close()
             except Exception:
                 pass
 
-    print(f"Done. Logged {reads} readings to {args.output}")
+    print(f"Done. Logged {reads} readings to {OUTPUT_CSV}")
 
 
 if __name__ == "__main__":

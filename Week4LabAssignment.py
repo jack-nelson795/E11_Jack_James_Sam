@@ -6,7 +6,7 @@ Example sketch to connect to PM2.5 sensor with either I2C or UART.
 """
 
 import time
-
+import csv
 import board
 import busio
 from digitalio import DigitalInOut, Direction, Pull
@@ -45,9 +45,22 @@ pm25 = PM25_UART(uart, reset_pin)
 # Connect to a PM2.5 sensor over I2C
 # pm25 = PM25_I2C(i2c, reset_pin)
 
+# create a csv file that we can read later
+file = open('AirQuality.csv', 'w', newline = None)
+csvwriter = csv.writer(file, delimiter = ',')
+
+# writing out the meta data
+meta = ['t_s', 'pm10_standard', 'pm25_standard', 'pm100_standard', 'pm10 env', 'pm25 env', 'pm100 env', 'particles 03um', 'particles 05um',
+        'particles 10um', 'particles 25um', 'particles 50um', 'particles 100um']
+csvwriter.writerow(meta)
+
 print("Found PM2.5 sensor, reading data...")
 
-while True:
+time_stamp = time.ctime()
+time_int_start = int(time.time())
+
+while time_int_stop <= (time_int_start + 30):
+    time_int_stop = int(time.time())
     time.sleep(1)
 
     try:
@@ -57,6 +70,8 @@ while True:
         print("Unable to read from sensor, retrying...")
         continue
 
+    print()
+    print("Time Stamp: " % time_stamp)
     print()
     print("Concentration Units (standard)")
     print("---------------------------------------")
@@ -78,3 +93,6 @@ while True:
     print("Particles > 5.0um / 0.1L air:", aqdata["particles 50um"])
     print("Particles > 10 um / 0.1L air:", aqdata["particles 100um"])
     print("---------------------------------------")
+
+    csvwriter.writerow([time_int_stop, aqdata["pm10 standard"], aqdata["pm25 standard"], aqdata["pm100 standard"], aqdata["pm10 env"], aqdata["pm25 env"], aqdata["pm100 env"]
+                        aqdata["particles 03um"], aqdata["particles 05um"], aqdata["particles 10um"], aqdata["particles 25um"], aqdata["particles 50um"], aqdata["particles 100um"]])

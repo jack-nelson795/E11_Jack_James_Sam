@@ -58,6 +58,7 @@ print("Found PM2.5 sensor, reading data...")
 
 time_stamp = time.ctime()
 time_int_start = int(time.time())
+time_int_stop = 0
 
 while time_int_stop <= (time_int_start + 30):
     time_int_stop = int(time.time())

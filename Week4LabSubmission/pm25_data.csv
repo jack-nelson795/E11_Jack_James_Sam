@@ -1,7 +1,5 @@
-# meta,start_epoch=1771024864,duration_s=30,interval_s=1,port=/dev/serial0
-#
-
 t_s,pm25_standard,pm25_env,pm10_standard,pm100_standard,particles_03um,particles_05um,particles_10um,particles_25um,particles_50um,particles_100um
+# meta,start_epoch=1771024864,duration_s=30,interval_s=1,port=/dev/serial0
 0,3,3,2,3,498,152,16,0,0,0
 1,3,3,2,3,498,152,16,0,0,0
 2,3,3,2,3,468,142,14,0,0,0

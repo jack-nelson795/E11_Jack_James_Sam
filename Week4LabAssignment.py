@@ -72,7 +72,7 @@ while time_int_stop <= (time_int_start + 30):
         continue
 
     print()
-    print("Time Stamp: " % time_stamp)
+    print(f"Time Stamp:  {time_stamp}")
     print()
     print("Concentration Units (standard)")
     print("---------------------------------------")

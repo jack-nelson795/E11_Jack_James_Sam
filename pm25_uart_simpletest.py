@@ -25,8 +25,10 @@ Reference:
 - https://learn.adafruit.com/pm25-air-quality-sensor/python-and-circuitpython
 """
 
-import time
+import argparse
+import csv
 import os
+import time
 
 
 def _print_measurements(data: dict) -> None:
@@ -49,7 +51,30 @@ def _print_measurements(data: dict) -> None:
     print("Particles > 10 um / 0.1L air:", data["particles 100um"])
 
 
+def _iso_timestamp(ts: float | None = None) -> str:
+    if ts is None:
+        ts = time.time()
+    # ISO-like, local time (easy to read in spreadsheets)
+    return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(ts))
+
+
+def _default_output_path() -> str:
+    # Use a timestamped filename to avoid overwriting runs.
+    return f"pm25_log_{time.strftime('%Y%m%d_%H%M%S')}.csv"
+
+
 def main() -> None:
+    parser = argparse.ArgumentParser(description="Read PM2.5 data over UART and log to CSV")
+    parser.add_argument("--duration", type=float, default=60.0, help="How long to log for (seconds)")
+    parser.add_argument("--interval", type=float, default=2.0, help="Delay between successful reads (seconds)")
+    parser.add_argument("--output", default=_default_output_path(), help="Output CSV file path")
+    parser.add_argument(
+        "--port",
+        default=os.getenv("PM25_SERIAL_PORT", "/dev/serial0"),
+        help="Serial device (e.g. /dev/serial0, /dev/ttyS0)",
+    )
+    args = parser.parse_args()
+
     try:
         import serial
         from adafruit_pm25.uart import PM25_UART
@@ -60,29 +85,85 @@ def main() -> None:
         print(f"Import error: {exc}")
         raise
 
-    # Raspberry Pi primary UART device.
-    # Override if needed, e.g. PM25_SERIAL_PORT=/dev/ttyS0 or PM25_SERIAL_PORT=COM3.
-    serial_port = os.getenv("PM25_SERIAL_PORT", "/dev/serial0")
-    uart = serial.Serial(serial_port, baudrate=9600, timeout=1)
+    uart = serial.Serial(args.port, baudrate=9600, timeout=1)
 
     # Create the PM25 sensor object. We set reset_pin=None because with UART wiring
     # you typically don't have a reset line connected.
     pm25 = PM25_UART(uart, reset_pin=None)  # type: ignore[arg-type]
 
-    print("PM2.5 UART simple test running... (Ctrl+C to stop)")
+    print(f"PM2.5 UART logging started. Duration={args.duration}s Interval={args.interval}s")
+    print(f"Serial port: {args.port}")
+    print(f"Output CSV:  {args.output}")
 
-    while True:
+    start_ts = time.time()
+    end_ts = start_ts + max(0.0, args.duration)
+    reads = 0
+
+    # Write CSV with a metadata line first, then a header row.
+    with open(args.output, "w", newline="") as f:
+        f.write(
+            "# meta," +
+            f"created={_iso_timestamp(start_ts)}," +
+            f"duration_s={args.duration}," +
+            f"interval_s={args.interval}," +
+            f"port={args.port}\n"
+        )
+        writer = csv.writer(f)
+        writer.writerow(
+            [
+                "timestamp",
+                "pm25_standard",
+                "pm25_env",
+                "pm10_standard",
+                "pm100_standard",
+                "particles_03um",
+                "particles_05um",
+                "particles_10um",
+                "particles_25um",
+                "particles_50um",
+                "particles_100um",
+            ]
+        )
+
         try:
-            data = pm25.read()
-        except RuntimeError:
-            # Read errors are fairly common; keep going.
-            print("Unable to read from sensor (retrying)...")
-            time.sleep(1)
-            continue
+            while time.time() < end_ts:
+                try:
+                    data = pm25.read()
+                except RuntimeError:
+                    print("Unable to read from sensor (retrying)...")
+                    time.sleep(0.5)
+                    continue
 
-        print(time.ctime())
-        _print_measurements(data)
-        time.sleep(2)
+                now = time.time()
+                print(_iso_timestamp(now))
+                _print_measurements(data)
+
+                writer.writerow(
+                    [
+                        _iso_timestamp(now),
+                        data.get("pm25 standard"),
+                        data.get("pm25 env"),
+                        data.get("pm10 standard"),
+                        data.get("pm100 standard"),
+                        data.get("particles 03um"),
+                        data.get("particles 05um"),
+                        data.get("particles 10um"),
+                        data.get("particles 25um"),
+                        data.get("particles 50um"),
+                        data.get("particles 100um"),
+                    ]
+                )
+                f.flush()
+                reads += 1
+
+                time.sleep(max(0.0, args.interval))
+        finally:
+            try:
+                uart.close()
+            except Exception:
+                pass
+
+    print(f"Done. Logged {reads} readings to {args.output}")
 
 
 if __name__ == "__main__":

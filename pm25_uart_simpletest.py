@@ -53,7 +53,7 @@ def _print_measurements(data: dict) -> None:
 SERIAL_PORT = os.getenv("PM25_SERIAL_PORT", "/dev/serial0")
 OUTPUT_CSV = "pm25_data.csv"
 DURATION_S = 30  # fixed run time (seconds)
-INTERVAL_S = 2   # seconds between successful reads
+INTERVAL_S = 1   # seconds between successful reads
 
 
 def main() -> None:

@@ -3,7 +3,7 @@ import time
 import numpy as np
 import sys
 
-arguments = sys.arg
+arguments = sys.argv
 print(arguments[0])
 print(arguments[1])
 

@@ -1,5 +1,4 @@
-# meta,start_epoch=1771630044,duration_s=300,interval_s=1,port=/dev/serial0
-t_s,TempreatureGasHumidityPressureAltitudepm25_standard,pm25_env,pm10_standard,pm100_standard,particles_03um,particles_05um,particles_10um,particles_25um,particles_50um,particles_100um
+t_s,Tempreature,Gas,Humidity,Pressure,Altitude,pm25_standard,pm25_env,pm10_standard,pm100_standard,particles_03um,particles_05um,particles_10um,particles_25um,particles_50um,particles_100um
 0,34.0,129278,100,749.831,2468.44,0,0,0,0,192,50,6,0,0,0
 1,22.6,26440,34.8,1006.149,59.29,0,0,0,0,192,50,6,0,0,0
 2,22.6,45355,34.8,1006.186,58.98,1,1,0,1,210,52,10,1,0,0
@@ -297,3 +296,4 @@ t_s,TempreatureGasHumidityPressureAltitudepm25_standard,pm25_env,pm10_standard,p
 297,16.8,168484,42.2,1007.444,48.45,4,4,3,4,741,204,16,0,0,0
 298,16.7,171544,42.2,1007.438,48.5,4,4,3,4,741,204,16,0,0,0
 299,16.7,173647,42.2,1007.431,48.56,4,4,4,4,774,213,17,0,0,0
+

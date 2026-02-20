@@ -5,7 +5,6 @@ import sys
 
 arguments = sys.argv
 print(arguments[0])
-print(arguments[1])
 
 file = open("test.csv", "w", newline = None)
 
@@ -14,7 +13,7 @@ csvwriter = csv.writer(file, delimiter=',')
 meta = ['time', 'data']
 csvwriter.writerow(meta)
 
-for i in range(10):
+for i in range(arguments[0]):
     now = time.time()
     value = np.random.random()
     csvwriter.writerow([now, value])

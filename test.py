@@ -1,6 +1,11 @@
 import csv
 import time
 import numpy as np
+import sys
+
+arguments = sys.arg
+print(arguments[0])
+print(arguments[1])
 
 file = open("test.csv", "w", newline = None)
 

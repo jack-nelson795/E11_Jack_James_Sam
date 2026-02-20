@@ -5,6 +5,7 @@ import sys
 
 arguments = sys.argv
 print(arguments[0])
+print(len(arguments[0]))
 
 file = open("test.csv", "w", newline = None)
 

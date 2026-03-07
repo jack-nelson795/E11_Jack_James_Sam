@@ -1,0 +1,286 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath}
+\usepackage{geometry}
+\geometry{margin=1in}
+
+\title{Circuit Simulation and Breadboard Lab}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{Part 1: Simulated Circuits}
+
+\subsection*{1. Resistors in Series}
+
+Two $100\,\Omega$ resistors were connected in series with a $10\,V$ source.
+
+Total resistance:
+\[
+R_{total} = 100 + 100 = 200\,\Omega
+\]
+
+Current:
+\[
+I = \frac{V}{R} = \frac{10}{200} = 0.05\,A
+\]
+
+Voltage across each resistor:
+\[
+V = IR = (0.05)(100) = 5\,V
+\]
+
+Node voltages:
+\begin{itemize}
+\item Source node: $10\,V$
+\item Middle node: $5\,V$
+\item Ground node: $0\,V$
+\end{itemize}
+
+Adding a third $100\,\Omega$ resistor:
+
+\[
+R_{total} = 300\,\Omega
+\]
+
+\[
+I = \frac{10}{300} = 0.0333\,A
+\]
+
+Voltage across each resistor:
+\[
+V = (0.0333)(100) = 3.33\,V
+\]
+
+Node voltages:
+\begin{itemize}
+\item $10\,V$
+\item $6.67\,V$
+\item $3.33\,V$
+\item $0\,V$
+\end{itemize}
+
+Adding resistance in series increases total resistance and reduces current while dividing the voltage across more nodes.
+
+\subsection*{2. Resistors in Parallel}
+
+Two $100\,\Omega$ resistors were connected in parallel across $10\,V$.
+
+Voltage across each resistor:
+\[
+V = 10\,V
+\]
+
+Current through each resistor:
+\[
+I = \frac{10}{100} = 0.1\,A
+\]
+
+Total current:
+\[
+I_{total} = 0.1 + 0.1 = 0.2\,A
+\]
+
+Adding a third $100\,\Omega$ resistor:
+
+\[
+I_3 = 0.1\,A
+\]
+
+\[
+I_{total} = 0.3\,A
+\]
+
+Voltage remains constant across branches while current increases when resistors are added in parallel.
+
+\subsection*{3. Series and Parallel Circuit}
+
+Two $100\,\Omega$ resistors were placed in parallel with a third $100\,\Omega$ resistor in series.
+
+Parallel equivalent:
+\[
+R_p = \frac{100 \times 100}{100 + 100} = 50\,\Omega
+\]
+
+Total resistance:
+\[
+R_{total} = 100 + 50 = 150\,\Omega
+\]
+
+Total current:
+\[
+I = \frac{10}{150} = 0.0667\,A
+\]
+
+Voltage across series resistor:
+\[
+V = (0.0667)(100) = 6.67\,V
+\]
+
+Voltage across parallel branch:
+\[
+10 - 6.67 = 3.33\,V
+\]
+
+Current in each parallel resistor:
+\[
+I = \frac{3.33}{100} = 0.0333\,A
+\]
+
+This circuit behaves as a combination of voltage division (series) and current division (parallel).
+
+\subsection*{4. RC Circuit}
+
+Given:
+\[
+R = 100\,\Omega
+\]
+\[
+C = 10\,\mu F
+\]
+
+Time constant:
+
+\[
+\tau = RC
+\]
+
+\[
+\tau = (100)(10\times10^{-6})
+\]
+
+\[
+\tau = 0.001\,s = 1\,ms
+\]
+
+Charging behavior:
+
+\[
+V_c = V(1-e^{-t/\tau})
+\]
+
+Discharging behavior:
+
+\[
+V_c = V_0 e^{-t/\tau}
+\]
+
+After one time constant:
+
+\[
+V = 0.63V_{final} \quad \text{(charging)}
+\]
+
+\[
+V = 0.37V_{initial} \quad \text{(discharging)}
+\]
+
+\subsection*{5. RC Low-Pass Filter}
+
+Given:
+
+\[
+R = 1\,k\Omega
+\]
+
+\[
+C = 1\,\mu F
+\]
+
+Time constant:
+
+\[
+\tau = RC = (1000)(1\times10^{-6}) = 0.001\,s
+\]
+
+Cutoff frequency:
+
+\[
+f_c = \frac{1}{2\pi RC}
+\]
+
+\[
+f_c \approx 159\,Hz
+\]
+
+For input frequencies near or above $159\,Hz$, the output waveform becomes smoother and lower in amplitude because the capacitor prevents rapid voltage changes.
+
+\section*{Part 2: Real Circuits}
+
+\subsection*{6. Breadboard Setup}
+
+Current through a $1\,\Omega$ resistor with $5\,V$ supply:
+
+\[
+I = \frac{5}{1} = 5\,A
+\]
+
+The Raspberry Pi power supply can provide approximately $2\,A$, so this current would exceed the supply limit and could cause overheating or shutdown.
+
+Using a $10\,k\Omega$ resistor:
+
+\[
+I = \frac{5}{10000} = 0.0005\,A
+\]
+
+\[
+I = 10\,mA
+\]
+
+Higher resistance limits current and prevents excessive heat.
+
+Measured voltage across resistor:
+
+\[
+V_{measured} = 5.222\,V
+\]
+
+Expected voltage:
+
+\[
+\approx 5\,V
+\]
+
+\subsection*{7. Real RC Circuit}
+
+Given:
+
+\[
+R = 10\,k\Omega
+\]
+
+\[
+C = 100\,\mu F
+\]
+
+Time constant:
+
+\[
+\tau = RC
+\]
+
+\[
+\tau = (10000)(100\times10^{-6})
+\]
+
+\[
+\tau = 1\,s
+\]
+
+After one time constant during discharge:
+
+\[
+V = 0.33(5.2) = 1.716\,V
+\]
+
+Measured time to reach (faulty equipment) $\approx1.716\,V$:
+
+\[
+t = 1\,s
+\]
+
+Differences between theoretical and measured values may arise from component tolerances, measurement uncertainty, and supply voltage variations.
+
+\end{document}
